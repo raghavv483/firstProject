@@ -81,6 +81,9 @@
 // });
 document.getElementById('signupForm').addEventListener('submit', async function(event) {
       event.preventDefault(); // Prevent the default form submission
+      const confirm=document.getElementById('confirm-password').value;
+      
+      
 
       // Simulate form submission
       const response = await fetch('http://localhost:3000/register', {
@@ -91,14 +94,18 @@ document.getElementById('signupForm').addEventListener('submit', async function(
         body: JSON.stringify({
           fullName: document.getElementById('name').value,
           email: document.getElementById('email').value,
-          password: document.getElementById('password').value
+          password: document.getElementById('password').value,
+          confirmPassword: document.getElementById('confirm-password').value,
+          
         })
       });
+      
       //console.log("hello windows",response.success)
      
       if (response) {
+
         // Redirect to login page on successful registration
-        window.location.href = 'http://localhost:58700/views/login.ejs';
+        window.location.href = '/views/login.ejs';
       } else {
         // Handle errors
         alert('Error registering user');

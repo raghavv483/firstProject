@@ -28,7 +28,7 @@ const generateAccessAndRefreshToken = async(userId) => {
 
 const signupUser = async function(req, res, next) {  
     try {  
-        const { email, fullName, password, username} = req.body;
+        const { email, fullName, password, username,confirmPassword} = req.body;
       
         const userExists = await User.findOne({ email }); 
       
@@ -36,15 +36,18 @@ const signupUser = async function(req, res, next) {
             return res.status(409).json({ error: "User with this email already exists" });  
         }  
       
-        
+        console.log(confirmPassword)
         const user = await User.create({  
             fullName,   
             email,  
             password,
             username,
+            confirmPassword,
             
         });  
         const createdUser = await User.findById(user._id).select("-password -refreshToken");  
+        console.log(createdUser)
+
         if (!createdUser) {  
             return res.status(500).json({ error: "User registration failed, please try again" });  
         }  
