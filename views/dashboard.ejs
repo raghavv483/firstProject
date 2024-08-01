@@ -1,11 +1,171 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>hi</h1>
+<body class="bg-gray-100">
+
+  <div class="container mx-auto mt-8">
+    <h1 class="text-2xl font-bold mb-4">User Dashboard</h1>
+
+    <!-- Add Project Form -->
+    <div class="bg-white p-6 rounded shadow-md mb-6">
+      <h2 class="text-xl font-bold mb-4">Add Project</h2>
+      <form id="addProjectForm" enctype="multipart/form-data" >
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for=" Project_name">Project Name</label>
+          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="projectName" type="text" placeholder="Project Name" required>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for=" Github_url">GitHub Repository Link</label>
+          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="githubLink" type="url" placeholder="https://github.com/username/repo" required>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="thumbnail">Thumbnail</label>
+          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="thumbnail" type="file" accept="image/*" required>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="Live_hosted_link">Live Hosted Link (Optional)</label>
+          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="liveLink" type="url" placeholder="https://liveproject.com">
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="TechStack_used">Tech Stack Used (Optional)</label>
+          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="techStack" type="text" placeholder="e.g., React, Node.js">
+        </div>
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" type="submit">
+          Add Project
+        </button>
+      </form>
+    </div>
+
+    <!-- View Projects -->
+    <div class="bg-white p-6 rounded shadow-md">
+      <h2 class="text-xl font-bold mb-4">Your Projects</h2>
+      <div id="projectsList" class="space-y-4">
+        <!-- Projects will be dynamically loaded here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('addProjectForm').addEventListener('submit', async function(event) {
+  event.preventDefault(); // Prevent the default form submission
+
+  const formData = new FormData();
+  formData.append('Project_name', document.getElementById('projectName').value);
+  formData.append('Github_url', document.getElementById('githubLink').value);
+  formData.append('thumbnail', document.getElementById('thumbnail').files[0]);
+  formData.append('Live_hosted_link', document.getElementById('liveLink').value);
+  formData.append('Techstack_used', document.getElementById('techStack').value);
+
+  try {
+    const response = await fetch('http://localhost:3000/project/create', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await response.json();
+    console.log("Response data: ", data);
+
+    if (data.success) {
+      console.log("Success");
+    //  await loadProjects(); // Reload projects list after adding
+      alert("Project added successfully");
+    } else {
+      alert('Failed to add project: ' + data.message);
+    }
+  } catch (err) {
+    console.error("Error:", err);
+    alert('An error occurred while adding the project');
+  }
+});
+
+      function loadProjects() {
+        console.log("call jaa raha hai");
+      fetch('http://localhost:3000/dashboard', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token') // Include token for authentication
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        const projectsList = document.getElementById('projectsList');
+        projectsList.innerHTML = '';
+
+        data.projects.forEach(project => {
+          const projectDiv = document.createElement('div');
+          projectDiv.classList.add('p-4', 'border', 'rounded', 'bg-gray-50');
+          projectDiv.innerHTML = `
+            <h3 class="text-lg font-bold">${project.name}</h3>
+            <p>GitHub: <a href="${project.githubLink}" class="text-blue-500">${project.githubLink}</a></p>
+            <p>Live: <a href="${project.liveLink}" class="text-blue-500">${project.liveLink || 'N/A'}</a></p>
+            <p>Tech Stack: ${project.techStack || 'N/A'}</p>
+            <button class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded mt-2" onclick="editProject(${project.id})">Edit</button>
+            <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded mt-2 ml-2" onclick="deleteProject(${project.id})">Delete</button>
+          `;
+          projectsList.appendChild(projectDiv);
+        });
+      })
+      .catch(error => console.error('Error:', error));
+    }
+
+    function editProject(projectId) {
+      // Implement the update functionality here
+      const newProjectName = prompt('Enter new project name:');
+      const newGithubLink = prompt('Enter new GitHub repository link:');
+      const newLiveLink = prompt('Enter new live hosted link (optional):');
+      const newTechStack = prompt('Enter new tech stack used (optional):');
+
+      fetch(`http://localhost:3000/project/update/${projectId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token') // Include token for authentication
+        },
+        body: JSON.stringify({
+            Project_name: newProjectName,
+            Github_url: newGithubLink,
+            Live_hosted_link: newLiveLink,
+            TechStack_used: newTechStack
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          loadProjects(); // Reload projects list after editing
+          
+        } else {
+          alert('Failed to edit project: ' + data.message);
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    }
+
+    function deleteProject(projectId) {
+      fetch(`http://localhost:3000/project/delete/${projectId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token') // Include token for authentication
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          loadProjects(); // Reload projects list after deleting
+        } else {
+          alert('Failed to delete project: ' + data.message);
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    }
+
+    // Load projects on page load
+    loadProjects();
+  </script>
+
 </body>
 </html>

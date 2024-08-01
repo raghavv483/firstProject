@@ -2,8 +2,9 @@ const express=require("express");
 const path=require("path");
 const projectRoutes=require('./routes/projectRoutes');
 const cors = require("cors");
-const serverless=require("serverless-http");
+
 const db=require("./db/dbConnect");
+
 
 const app=express();
 app.use(cors());
@@ -15,7 +16,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));  
 app.use(express.static(path.join(__dirname, 'views')));
 app.use("/",projectRoutes);
-app.use("/.netifly/functions/api",projectRoutes);
 
 db.connect();
 
@@ -24,6 +24,7 @@ app.post('/register', (req, res) => {
 
   res.status(200).json({ message: 'Registration successful' });
 
+
   res.status(400).json({ message: 'Error registering user' });
 });
 
@@ -31,5 +32,3 @@ const port=3000;
 app.listen(port,()=>{
     console.log(`server is running on port ${port}`);
 });
-
-module.exports.handler=serverless(app);
