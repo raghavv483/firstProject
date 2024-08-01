@@ -6,6 +6,8 @@ const JWT=require("jsonwebtoken");
 const mongoose=require("mongoose");
 const ApiResponse=require("../utils/apiResponse");
 const ApiError=require("../utils/apiError");
+const nodemailer=require("nodemailer");
+const dotenv=require("dotenv");
 const generateAccessAndRefreshToken = async(userId) => {
 
     try {
@@ -23,9 +25,10 @@ const generateAccessAndRefreshToken = async(userId) => {
     }
 };
 
+
 const signupUser = async function(req, res, next) {  
     try {  
-        const { email, fullName, password} = req.body;
+        const { email, fullName, password, username} = req.body;
       
         const userExists = await User.findOne({ email }); 
       
@@ -35,29 +38,17 @@ const signupUser = async function(req, res, next) {
       
         
         const user = await User.create({  
-            fullName,  
-            // thumbnail: {  
-            //     public_id: thumbnail?.public_id, 
-            //     url: thumbnail?.secure_url  
-            // },  
+            fullName,   
             email,  
             password,
+            username,
+            
         });  
-    
         const createdUser = await User.findById(user._id).select("-password -refreshToken");  
         if (!createdUser) {  
             return res.status(500).json({ error: "User registration failed, please try again" });  
         }  
 
-        // if (true) { // Replace with actual success condition
-        //     res.redirect('/login'); // Redirect to the login page upon successful registration
-        //   } 
-        //   else {
-        //     res.status(400).json({ error: 'Error registering user' });
-        //   };
-        
-        
-        //return res.status(201).json(( createdUser, "User registered successfully",{success:true})); 
         return res.json({msg:"User created Successfully",
             success:true
         })   
@@ -132,5 +123,6 @@ const logoutUser = async(req, res) => {
             )
         );
 };
+
 
 module.exports={logoutUser,signupUser,login};

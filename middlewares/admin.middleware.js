@@ -1,31 +1,29 @@
 const express = require('express');  
 const app = express();  
 const bodyParser = require('body-parser');  
-
+const admin=require("../models/admins")
 
 let users = []; //user data  
 let projects = []; // project data  
 
-const adminMiddleware = (req, res, next) => {  
-  const email = req.body.email; 
-  
-  if (adminEmails.includes(email)) {  
-    next(); 
-  } else {  
-    res.status(403).json({ message: 'You are not a  Admin' });  
-  }  
+const adminMiddleware = async(req, res, next) => {  
+    const accessToken = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
+
+    if (!accessToken) {
+        throw new ApiError(401, "Unauthorized request");
+    }
+    const decodedToken = JWT.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+
+    const admin = await admin.findById(decodedToken?._id).select(" -password -refreshToken");
+    
+    if (!admin) {
+        throw new ApiError(401, "Invalid access token");
+    }
+    req.admin = admin;
+        next();
 };  
 
 
-app.post('/admin/login', (req, res) => {  
-  const email = req.body.email;  
-
-  if (adminEmails.includes(email)) {  
-    res.status(200).json({ message: 'Login successful' });  
-  } else {  
-    res.status(401).json({ message: 'Invalid admin email' });  
-  }  
-});  
 
 //ger all users
 app.get('/admin/users', adminMiddleware, (req, res) => {  

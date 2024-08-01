@@ -12,11 +12,17 @@ const userSchema=mongoose.Schema({
     },
     email: {
         type: String,
-        required: [true, 'email is required'],
+        required: true,
         unique: true,
-        lowercase: true,
-        trim: true,
+        validate: {
+            validator: function(v) {
+                // Regex to validate email ending with @lnmiit.ac.in
+                return /^[a-zA-Z0-9._%+-]+@lnmiit\.ac\.in$/.test(v);
+            },
+            message: props => `${props.value} is not a valid institute email. Only emails ending with @lnmiit.ac.in are allowed.`
+        }
     },
+
     fullName: {
         type: String,
         required: [true, 'fullname is required'],
@@ -24,9 +30,28 @@ const userSchema=mongoose.Schema({
         index: true
     },
     password: {
-        type:String,
-        required: [true, 'password is required'],
+        type: String,
+        required: true,
+        minlength: 8,
+        validate: {
+            validator: function(v) {
+                // Regex to check password strength
+                return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(v);
+            },
+            message: props => `Password must be at least 8 characters long, include at least one uppercase letter, one lowercase letter, one number, and one special character.`
+        }
     },
+    confirmPassword: {
+        type: String,
+        required: true,
+        validate: {
+            validator: function(v) {
+                return v === this.password;
+            },
+            message: 'Passwords do not match.'
+        }
+    },
+
     refresh_token:{
         type:String,
     },
@@ -66,7 +91,7 @@ userSchema.methods = {
         email:this.email,
         fullName:this.fullName
         },
-        "SFDLKJDSF2345TRGFLJKJKHBJ786879JKNHURETJ444445654RENDKFNI34543",
+        process.env.ACCESS_TOKEN_SECRET,
         {
             expiresIn: "10d"
         }
@@ -77,7 +102,7 @@ userSchema.methods = {
         {
             _id: this._id,
         },
-        "SFDJKLAJKDSJ45N5NJKN435J5N4JK54N45JN5JKNJK5J4KBK4K3JB5KJ4B",
+        process.env.REFRESH_TOKEN_SECRET,
         {
             expiresIn: "1d"
         }

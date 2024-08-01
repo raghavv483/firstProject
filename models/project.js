@@ -16,7 +16,7 @@ const projectSchema=mongoose.Schema({
     },
     thumbnail: {
         type:String,
-        required: false
+        required: true,
     },
    
     Live_hosted_link:{
