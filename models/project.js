@@ -3,7 +3,7 @@ const mongoose=require("mongoose");
 const jwt=require("jsonwebtoken");
 const bcrypt=require("bcrypt")
 
-mongoose.connect("mongodb://127.0.0.1:27017/gdscProject")
+
 
 const projectSchema=mongoose.Schema({
     Project_name: {

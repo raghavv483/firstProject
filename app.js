@@ -1,11 +1,13 @@
 const express=require("express");
-const app=express();
 const path=require("path");
 const projectRoutes=require('./routes/projectRoutes');
 const cors = require("cors");
 const serverless=require("serverless-http");
+const db=require("./db/dbConnect");
 
+const app=express();
 app.use(cors());
+
 
 app.set("view engine", "ejs");  
 app.set("views", path.join(__dirname, "views"));  
@@ -14,6 +16,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'views')));
 app.use("/",projectRoutes);
 app.use("/.netifly/functions/api",projectRoutes);
+
+db.connect();
 
 app.post('/register', (req, res) => {
   const { fullName, email, password } = req.body;

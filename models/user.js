@@ -1,9 +1,8 @@
 const mongoose=require("mongoose");
-
 const jwt=require("jsonwebtoken");
 const dotenv=require("dotenv").config();
 const bcrypt=require("bcrypt");
-mongoose.connect("mongodb://127.0.0.1:27017/gdscProject");
+
 
 const userSchema=mongoose.Schema({
     userProject:{
